@@ -1,3 +1,16 @@
+"""
+======
+Modelo
+======
+
+
+
+iuytoiug iuyo g ouygt oygiouyg
+
+
+
+"""
+
 import os
 import warnings
 from typing import Any, Callable, List, Tuple, Optional
