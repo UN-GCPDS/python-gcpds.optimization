@@ -1,0 +1,82 @@
+# .github/workflows
+
+name: Automated Documentation and Code Formatting
+
+# Workflow triggers
+on:
+  workflow_dispatch:  # Allows manual triggering of the workflow
+  push:               # Triggers the workflow on every push to the repository
+
+jobs:
+  format-sphinx-customized:
+    runs-on: ubuntu-latest  # Specifies the virtual machine to use, in this case, the latest version of Ubuntu
+
+    # Defines permissions for this job
+    permissions:
+      contents: write  # Permissions to write to the repository
+
+    steps:
+      - uses: actions/checkout@v4  # Checks out the code from the repository
+
+      # Step to update and prepare the documentation
+      - name: Prepare and Update Documentation
+
+        run: |
+          # Pulls necessary Docker images for documentation
+          docker pull dunderlab/docs
+          docker pull sphinxdoc/sphinx-latexpdf
+
+          # Installs required Python packages
+          pip install nbsphinx
+          pip install dunderlab-docs
+
+          # Sets up initial documentation if a 'docs' directory does not exist
+          if [ ! -d "docs" ]; then
+              dunderlab_docs quickstart '--project "${{ vars.DOCS_PROJECT_NAME }}" --author "${{ vars.DOCS_AUTHOR }}" --extensions nbsphinx,dunderlab.docs --no-batchfile --quiet --sep'
+          fi
+
+          # Generates API documentation and builds HTML and Latex PDF if SUBMODULE is set
+          if [ -n "${{ vars.DOCS_SUBMODULE }}" ]; then
+            dunderlab_docs apidoc "${{ vars.DOCS_MODULE }}"
+            dunderlab_docs build html "${{ vars.DOCS_MODULE }}/${{ vars.DOCS_SUBMODULE }}"
+            dunderlab_docs build latexpdf "${{ vars.DOCS_MODULE }}/${{ vars.DOCS_SUBMODULE }}"
+          else
+            dunderlab_docs apidoc "${{ vars.DOCS_MODULE }}"
+            dunderlab_docs build html "${{ vars.DOCS_MODULE }}"
+            dunderlab_docs build latexpdf "${{ vars.DOCS_MODULE }}"
+          fi
+
+          # Adds a configuration file for Read the Docs
+          # Verifies if .readthedocs.yml exists, if not, creates it
+          if [ ! -f ".readthedocs.yml" ]; then
+            echo """# .readthedocs.yml
+            # Read the Docs configuration file
+            # See https://docs.readthedocs.io/en/stable/config-file/v2.html for details
+
+            # Required
+            version: 2
+
+            # Build documentation in the docs/ directory with Sphinx
+            sphinx:
+              configuration: docs/source/conf.py
+
+            # Optionally set the version of Python and requirements required to build your docs
+            python:
+              install:
+                - requirements: docs/requirements
+
+            # Set the version of Python and other tools you might need
+            build:
+              os: ubuntu-22.04
+              tools:
+                python: \"3.11\"
+
+            formats:
+              - epub
+              - pdf
+            """ >> .readthedocs.yml
+          fi
+
+
+      # Commit all changed files back to the repository
+      - uses: stefanzweifel/git-auto-commit-action@v5
