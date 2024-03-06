@@ -1381,10 +1381,6 @@ def visualize_non_convergence(data_path='/content/drive/Shareddrives/red_gas_col
     plt.yticks(fontsize=10)
     plt.show()
 
-    import numpy as np
-    import matplotlib.pyplot as plt
-
-
 def identify_atypical_values(files):
     """
     Identify and visualize the percentage of atypical values in a list of arrays.
@@ -1450,7 +1446,7 @@ def dynamic_val(s1='/content/drive/Shareddrives/red_gas_col/', s2='/content/driv
 
     modelpath = 'modelCol.h5'
     filepath = 'ng_caseCol_18.xlsx'
-    path = s1_path / filepath[im]
+    path = s1_path / filepath 
     Data_inf = pd.read_excel(path, sheet_name='node.info')
     Data_D = pd.read_excel(path, sheet_name='node.dem')
     Data_Dc = pd.read_excel(path, sheet_name='node.demcost')
@@ -1592,8 +1588,7 @@ def bounded(s1='/content/drive/Shareddrives/red_gas_col/', s2='/content/drive/Sh
     elif s == 1:
         modelpath = ['model8.h5', 'model9.h5', 'model10.h5', 'model11.h5',
                      'model12.h5', 'model13.h5', 'model14.h5', 'model15.h5', 'modelCol.h5']
-    filepath = ['ng_case8.xlsx', 'ng_case9.xlsx', 'ng_case10.xlsx', 'ng_case11.xlsx',
-                'ng_case12.xlsx', 'ng_case13.xlsx', 'ng_case14.xlsx', 'ng_case15.xlsx', 'ng_caseCol_18.xlsx']
+    filepath = ['ng_case8.xlsx', 'ng_case9.xlsx', 'ng_case10.xlsx', 'ng_case11.xlsx','ng_case12.xlsx', 'ng_case13.xlsx', 'ng_case14.xlsx', 'ng_case15.xlsx', 'ng_caseCol_18.xlsx']
     Weymouth = pd.DataFrame()
     Balance = pd.DataFrame()
     Costos = pd.DataFrame()

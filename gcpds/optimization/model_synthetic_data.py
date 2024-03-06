@@ -1,28 +1,3 @@
-"""
-========================================================
-Solver Applications in Optimization and Network Modeling
-========================================================
-
-
-The provided code constitutes a comprehensive framework for research and development in the fields of artificial intelligence and computational biology. Its architecture consists of specialized modules addressing key aspects of modeling, machine learning, and optimization, with an emphasis on code robustness and reusability.
-
-From a technical perspective, the code includes:
-
-Training Data Generation: Functionality for generating synthetic data and manipulating real datasets, with advanced options for controlled noise introduction and simulation of specific scenarios.
-
-Machine Learning Model Development: Tools for constructing and customizing machine learning models, including deep neural network architectures and supervised and unsupervised learning algorithms.
-
-Performance Evaluation: Capabilities for systematically evaluating model performance under various conditions, using statistical metrics and visualizations to analyze prediction quality and generalization ability.
-
-Optimization Solver Comparison: Functionality for comparing different optimization methods used in solving specific problems, with tools for measuring convergence, computational efficiency, and scalability.
-
-The underlying technical approach is based on the efficient implementation of algorithms and data structures, leveraging high-performance software libraries, and adopting software engineering practices such as modularity, encapsulation, and detailed documentation.
-
-
-
-
-"""
-
 import os
 import warnings
 from typing import Any, Callable, List, Tuple, Optional
@@ -51,7 +26,7 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from tensorflow.keras.callbacks import Callback
 from tensorflow.python.ops.nn_ops import softmax
 from IPython import display
-
+from typing import List, Optional
 # Metrics aliases for clarity
 mse = mean_squared_error
 mae = mean_absolute_error
@@ -293,44 +268,55 @@ class Evaluate:
       
         return MAPE_y, MAPE_pi
 
-    from typing import List, Optional
+    
     
     def history_plot(self) -> pd.DataFrame:
-      """
-      Plot the training history for different loss functions.
+        """
+        Plot the training history for different loss functions.
+
+        Returns:
+            pd.DataFrame: A DataFrame containing the history of the model's loss and validation loss.
+        """
+
+        # Obtener los datos de entrada y salida
+        u = self.U[-1]
+        y = self.Y[-1, 0]
+
+        # Inicializar una lista para almacenar el historial de pérdidas
+        history_loss = []
+
+        # Crear tres figuras independientes para cada función de pérdida
+        fig, axs = plt.subplots(3, 1, figsize=(10, 18))
+
+        # Iterar sobre diferentes funciones de pérdida
+        for i, loss_function in enumerate(['mse', 'mae', 'huber']):
+            # Crear un modelo con la función de pérdida actual
+            modeloMax = self.create_custom_model(loss=loss_function)
+
+            # Entrenar el modelo y obtener el historial de pérdidas
+            history = modeloMax.fit(u[0:400], y[0:400], epochs=100, batch_size=32,
+                                    verbose=False, validation_split=0.3, steps_per_epoch=2)
+
+            # Convertir el historial de pérdidas a un DataFrame y agregarlo a la lista
+            history_loss.append(pd.DataFrame(history.history))
+
+            # Trazar la pérdida de entrenamiento y validación para la función de pérdida actual
+            axs[i].plot(history_loss[-1]['loss'], label=loss_function)
+            axs[i].plot(history_loss[-1]['val_loss'], label='val_' + loss_function)
+
+            # Agregar leyendas y etiquetas de ejes para cada gráfico
+            axs[i].legend()
+            axs[i].set_xlabel('Epoch')
+            axs[i].set_ylabel('Error')
+            axs[i].set_title(f'Training and Validation Loss for {loss_function.upper()}')
+
+        # Ajustar el espaciado entre subgráficos
+        plt.tight_layout()
+
+        # Mostrar las gráficas
+        plt.show()
+
   
-      Returns:
-          pd.DataFrame: A DataFrame containing the history of the model's loss and validation loss.
-      """
-
-      u = self.U[-1]
-      y = self.Y[-1, 0]
-        
-      history_loss = []
-      fig, axs = plt.subplots(1, 2, figsize=(20, 20))
-      for i in ['mse','mae','huber']:
-        modeloMax = self.create_custom_model(loss=i)
-
-        history = modeloMax.fit(u[0:400], y[0:400], epochs=100, batch_size=32,
-                                verbose=False, validation_split=0.3, steps_per_epoch=2)
-        
-        history_loss=pd.DataFrame(history.history)
-            
-        axs[0].plot(history_loss['loss'],label=i)
-        axs[1].plot(history_loss['val_loss'],label='val_'+i)  
-      
-
-      axs[0].legend()
-      axs[1].legend()
-
-      axs[0].set_xlabel('Epoch')
-      axs[0].set_ylabel('Error')
-
-      axs[1].set_xlabel('Epoch')
-      axs[1].set_ylabel('Error')
-      plt.show()
-
-      return history_loss
 
         
       
