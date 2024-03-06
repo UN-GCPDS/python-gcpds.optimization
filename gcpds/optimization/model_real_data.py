@@ -24,7 +24,7 @@ import pandas as pd
 from IPython import display
 from keras.models import Sequential
 import os
-
+from pathlib import Path
 import scipy.io as sio
 import time
 mse = mean_squared_error
@@ -140,7 +140,7 @@ class CustomSigmoidActivation():
     def get_config(self) -> dict:
         """
         Returns the configuration of the CustomSigmoidActivation function.
-        
+
         Returns
                 -------
         dict
@@ -485,9 +485,9 @@ def swish(x):
     return x * tf.sigmoid(x)
 
 
-class CustomLoss3(tf.keras.losses.Loss):
+class CustomLossFuntion(tf.keras.losses.Loss):
     """
-    A custom loss function that computes a loss based on specific criteria 
+    A custom loss function that computes a loss based on specific criteria
     and includes a penalty term for certain conditions.
 
     Attributes
@@ -677,7 +677,7 @@ def flow_model(path, fd, seeds=1, s=1):
     Bc = Data_C['ratio'].values
 
     model = Model(In, [Out1, Out2])
-    model.compile(loss=['huber', CustomLoss3(Kt, i, j, Bc, ib, jb, ftfn)],
+    model.compile(loss=['huber', CustomLossFuntion(Kt, i, j, Bc, ib, jb, ftfn)],
                   optimizer=tf.keras.optimizers.Adamax(1e-2), loss_weights=[0.7, 0.3])
     return model
 
@@ -693,8 +693,8 @@ def plots(Balance, Wey, re, Costos, s):
     - Costos (DataFrame): DataFrame containing cost data.
     - s (int): Mode switch for the plot titles.
 
-    This function generates a 2x2 grid of boxplots, each representing data from 
-    one of the provided DataFrames. The boxplots for 'Balance' and 'Costos' are 
+    This function generates a 2x2 grid of boxplots, each representing data from
+    one of the provided DataFrames. The boxplots for 'Balance' and 'Costos' are
     set to a logarithmic scale. The title of the plots changes based on the value of 's'.
     """
     # Create a 2x2 subplot grid
@@ -768,13 +768,14 @@ def load_data(path, key):
     specific format within the MATLAB file.
     """
     aux = []
-    for i in range(8):
-        # Load data from the specified key and index
+    cont = 0
+    for i in range(9):
+        aux.append([])
         X_test = sio.loadmat(path)[key][i]
-        # Extract the first element of each entry in X_test
-        aux.append([j[0] for j in X_test])
-
-        return aux
+        for j in X_test:
+            aux[cont].append(j[0])
+        cont = cont + 1
+    return aux
 
 
 def evaluate_balance(FT, W, X):
@@ -789,7 +790,7 @@ def evaluate_balance(FT, W, X):
     Returns:
     - list: A list containing two lists of MAPE values for each forecast set in FT.
 
-    This function computes the MAPE between the actual data (X) and each set of 
+    This function computes the MAPE between the actual data (X) and each set of
     forecasted data in FT, using the provided weight matrix W.
     """
     aux1 = [mape(X[i], FT[0][i] @ W.T) for i in range(len(FT[0]))]
@@ -830,8 +831,8 @@ def evaluate_cost(X, Y):
     Returns:
     - list: A list of differences between predicted and actual costs.
 
-    This function iterates over each element in X and Y, calculates the 
-    difference (Y[i] - X[i]) for each corresponding element, and returns 
+    This function iterates over each element in X and Y, calculates the
+    difference (Y[i] - X[i]) for each corresponding element, and returns
     these differences in a list.
     """
     # Using list comprehension for concise calculation
@@ -916,6 +917,9 @@ def plot_time(b='fit', s1='/content/drive/Shareddrives/red_gas_col/', s2='/conte
     The boxplots provide a comparison of time taken by different network models for predictions or fitting.
     """
 
+    s1_path = Path(s1)
+    s2_path = Path(s2)
+
     filepath = ['ng_case8.xlsx', 'ng_case9.xlsx', 'ng_case10.xlsx', 'ng_case11.xlsx',
                 'ng_case12.xlsx', 'ng_case13.xlsx', 'ng_case14.xlsx', 'ng_case15.xlsx', 'ng_caseCol_18.xlsx']
     if s == 0:
@@ -924,18 +928,19 @@ def plot_time(b='fit', s1='/content/drive/Shareddrives/red_gas_col/', s2='/conte
     elif s == 1:
         modelpath = ['model8.h5', 'model9.h5', 'model10.h5', 'model11.h5',
                      'model12.h5', 'model13.h5', 'model14.h5', 'model15.h5', 'modelCol.h5']
-    X_test = load_data(s2 + 'inputs_P.mat', 'inputs')
-    times = np.array(sio.loadmat(s2 + 'times_P.mat')['times'])
+
+    X_test = load_data(s2_path / 'inputs_P.mat', 'inputs')
+    times = np.array(sio.loadmat(s2_path / 'times_P.mat')['times'])
 
     fontsize = 20
     rotation_angle = 45
     if b == 'predict':
         Times_p = pd.DataFrame()
         for im in range(9):
-            path = s1 + filepath[im]
+            path = s1_path / filepath[im]
             fd = np.array(X_test[im]).max(axis=0)
-            model2 = flow_model(path, fd, seeds=1, s=s)
-            model2.load_weights(s2 + modelpath[im])
+            model2 = flow_model(str(path), fd, seeds=1, s=s)
+            model2.load_weights(s2_path / modelpath[im])
 
             time_callback = TimeHistoryTest()
             predictions = model2.predict(np.array(X_test[im]), batch_size=1, callbacks=[
@@ -964,7 +969,7 @@ def plot_time(b='fit', s1='/content/drive/Shareddrives/red_gas_col/', s2='/conte
         plt.show()
     else:
         N = 15920
-        timesr = pd.read_csv(s2 + 'Time.csv').values
+        timesr = pd.read_csv(s2_path / 'Time.csv').values
         im = pd.DataFrame()
         for i in range(9):
             if i == 8:
@@ -1010,9 +1015,12 @@ def ng_case_evaluate(s1='/content/drive/Shareddrives/red_gas_col/', s2='/content
 
     Returns a tuple of DataFrames: (Balance, Weymouth, Pj/Pi, Cost)
     """
+    s1_path = Path(s1)
+    s2_path = Path(s2)
 
-    X_test = load_data(s2 + 'inputs_P.mat', 'inputs')
-    y_test = load_data(s2 + 'outputs_P.mat', 'outputs')
+    X_test = load_data(s2_path / 'inputs_P.mat', 'inputs')
+    y_test = load_data(s2_path / 'outputs_P.mat', 'outputs')
+
     if s == 0:
         modelpath = ['model2_8.h5', 'model2_9.h5', 'model2_10.h5', 'model2_11.h5',
                      'model2_12.h5', 'model2_13.h5', 'model2_14.h5', 'model2_15.h5', 'model2_Col.h5']
@@ -1039,11 +1047,14 @@ def ng_case_evaluate(s1='/content/drive/Shareddrives/red_gas_col/', s2='/content
                                Data_Dc['al_Ind'].values, Data_Dc['al_Com'].values, Data_Dc[
                                    'al_NGV'].values, Data_Dc['al_Ref'].values, Data_Dc['al_Pet'].values,
                                Data_sto['C_S+'].values - Data_sto['C_V'].values, -1 * (Data_sto['C_S-'] - Data_sto['C_V']).values, Data_sto['C_V'].values)).reshape(-1, 1)
+
         w = gen_w(Data_inf, Data_W, Data_T, Data_C, Data_Dc, Data_sto)
         y = np.array(y_test[im])
         fd = np.array(X_test[im]).max(axis=0)
-        model2 = flow_model(path, fd, seeds=1, s=s)
-        model2.load_weights(s2 + modelpath[im])
+
+        model2 = flow_model(str(path), fd, seeds=1, s=s)
+        model2.load_weights(s2_path / modelpath[im])
+
         model_A = tf.keras.Model(
             inputs=model2.inputs, outputs=model2.get_layer('F').output)
         model_B = tf.keras.Model(
@@ -1167,6 +1178,8 @@ def ng_evaluate_atip(s1='/content/drive/Shareddrives/red_gas_col/', s2='/content
     Returns:
     - tuple: A tuple containing lists of evaluation metrics (Balance, Weymouth, PjPi, Costos) for each network case.
     """
+    s1_path = Path(s1)
+    s2_path = Path(s2)
 
     if s == 0:
         modelpath = ['model2_8.h5', 'model2_9.h5', 'model2_10.h5', 'model2_11.h5',
@@ -1182,7 +1195,7 @@ def ng_evaluate_atip(s1='/content/drive/Shareddrives/red_gas_col/', s2='/content
     Costos = []  # pd.DataFrame()
     PjPi = []  # pd.DataFrame()
     for im in range(9):
-        path = s1 + filepath[im]
+        path = s1_path / filepath[im]
         Data_inf = pd.read_excel(path, sheet_name='node.info')
         Data_D = pd.read_excel(path, sheet_name='node.dem')
         Data_Dc = pd.read_excel(path, sheet_name='node.demcost')
@@ -1196,14 +1209,16 @@ def ng_evaluate_atip(s1='/content/drive/Shareddrives/red_gas_col/', s2='/content
                                Data_sto['C_S+'].values - Data_sto['C_V'].values, -1 * (Data_sto['C_S-'] - Data_sto['C_V']).values, Data_sto['C_V'].values)).reshape(-1, 1)
         w = gen_w(Data_inf, Data_W, Data_T, Data_C, Data_Dc, Data_sto)
         if im == 8:
-            X_test = sio.loadmat(s2 + 'inputs_None_'
-                                 + str(im + 8) + '.mat')['inputs'][0]
+            X_test = sio.loadmat(
+                s2_path / f'inputs_None_{im + 8}.mat')['inputs'][0]
+
         else:
-            X_test = sio.loadmat(s2 + 'inputs_None_'
-                                 + str(im + 8) + '.mat')['inputs']
+            X_test = sio.loadmat(
+                s2_path / f'inputs_None_{im + 8}.mat')['inputs']
+
         fd = np.array(X_test).max(axis=0)
-        model2 = flow_model(path, fd, seeds=1, s=s)
-        model2.load_weights(s2 + modelpath[im])
+        model2 = flow_model(str(path), fd, seeds=1, s=s)
+        model2.load_weights(s2_path / modelpath[im])
         model_A = tf.keras.Model(
             inputs=model2.inputs, outputs=model2.get_layer('F').output)
         model_B = tf.keras.Model(
@@ -1340,15 +1355,16 @@ def visualize_non_convergence(data_path='/content/drive/Shareddrives/red_gas_col
     - data_path (str): Path to the directory containing input data files.
     - network_range (tuple): Range of network files to analyze (inclusive).
 
-    The function loads data from specified files and calculates the percentage of 
+    The function loads data from specified files and calculates the percentage of
     non-convergence cases. It then generates a bar plot to visually represent this data.
     """
 
+    data_path = Path(data_path)
     percentages = []
     labels = []
 
     for file_index in range(*network_range):
-        file_path = f'{data_path}{file_index}.mat'
+        file_path = data_path.parent / f'{data_path.name}{file_index}.mat'
         data = sio.loadmat(file_path)['inputs']
         non_convergence_percentage = (data.shape[0] / 1000) * 100
         percentages.append(non_convergence_percentage)
@@ -1401,7 +1417,7 @@ def identify_atypical_values(files):
     plt.show()
 
 
-def dynamic_val():
+def dynamic_val(s1='/content/drive/Shareddrives/red_gas_col/', s2='/content/drive/Shareddrives/red_gas_col/Prueba/Data/'):
     """
     Generates sinusoidal behavior and adjusts random data accordingly.
 
@@ -1424,15 +1440,17 @@ def dynamic_val():
     data_sum = np.sum(data, axis=1)
     adjustment_factor = sine_wave / data_sum  # Adjustment factor for each row
 
+    s1_path = Path(s1)
+    s2_path = Path(s2)
+
     # Adjust the data
     for i in range(data.shape[1]):
         data[:, i] *= adjustment_factor
     X_test = data
-    s1 = '/content/drive/Shareddrives/red_gas_col/'
-    s2 = '/content/drive/Shareddrives/red_gas_col/Prueba/Data/'
+
     modelpath = 'modelCol.h5'
     filepath = 'ng_caseCol_18.xlsx'
-    path = s1 + filepath
+    path = s1_path / filepath[im]
     Data_inf = pd.read_excel(path, sheet_name='node.info')
     Data_D = pd.read_excel(path, sheet_name='node.dem')
     Data_Dc = pd.read_excel(path, sheet_name='node.demcost')
@@ -1449,7 +1467,7 @@ def dynamic_val():
     # Assuming Fd, Fw, and data are your data.
     plt.figure(figsize=(15, 5))
     model2 = flow_model(path, fd, seeds=1, s=1)
-    model2.load_weights(s2 + modelpath)
+    model2.load_weights(s2_path / modelpath)
     model_A = tf.keras.Model(inputs=model2.inputs,
                              outputs=model2.get_layer('F').output)
     model_B = tf.keras.Model(inputs=model2.inputs,
@@ -1464,7 +1482,7 @@ def dynamic_val():
     plt.plot(data.sum(axis=1), label="Total Demand")
     model2 = flow_model(path, fd, seeds=1, s=0)
     modelpath = 'model2_Col.h5'
-    model2.load_weights(s2 + modelpath)
+    model2.load_weights(s2_path / modelpath)
     model_A = tf.keras.Model(inputs=model2.inputs,
                              outputs=model2.get_layer('F').output)
     model_B = tf.keras.Model(inputs=model2.inputs,
@@ -1485,13 +1503,13 @@ def dynamic_val():
 def loss_val():
     """
     Visualizes and compares differences in performance metrics of various models using box plots.
-    
+
     This function loads performance data from different models from the files Weymouth.xlsx, Balance.xlsx, and Costos.xlsx.
     Then, box plots are generated for each of these metrics, showing how the performance values are distributed among the different models.
-    
+
     The plots display the Mean Absolute Percentage Error (MAPE) and costs, facilitating visual comparison between the models.
     A logarithmic scale is used to ease the visualization of data that may have a wide range of values.
-    
+
     The function has no input parameters and does not return any value. The results are directly displayed as plots.
     """
 
@@ -1541,14 +1559,14 @@ def loss_val():
 def bounded(s1='/content/drive/Shareddrives/red_gas_col/', s2='/content/drive/Shareddrives/red_gas_col/Prueba/Data/', s=1):
     """
      Generates box plots to visualize and compare performance metric differences across various models.
- 
+
      This function loads performance data of different models from the Weymouth.xlsx, Balance.xlsx, and Costos.xlsx files.
      Then, box plots are generated for each of these metrics, showing how the performance values are distributed
      among the different models.
- 
+
      The plots display the Mean Absolute Percentage Error (MAPE) and costs, facilitating visual comparison between the models.
      A logarithmic scale is used to ease the visualization of data that may have a wide range of values.
- 
+
      Parameters
      ----------
      s1 : str, optional
@@ -1557,14 +1575,17 @@ def bounded(s1='/content/drive/Shareddrives/red_gas_col/', s2='/content/drive/Sh
          Path to the directory containing model data files. Default is '/content/drive/Shareddrives/red_gas_col/Prueba/Data/'.
      s : int, optional
          Determines the type of model. If 0, uses one set of models, if 1, uses another set. Default is 1.
- 
+
      Returns
      -------
      None
          The results are directly displayed as plots.
      """
-    X_test = load_data(s2 + 'inputs_P.mat', 'inputs')
-    y_test = load_data(s2 + 'outputs_P.mat', 'outputs')
+    s1_path = Path(s1)
+    s2_path = Path(s2)
+
+    X_test = load_data(s2_path / 'inputs_P.mat', 'inputs')
+    y_test = load_data(s2_path / 'outputs_P.mat', 'outputs')
     if s == 0:
         modelpath = ['model2_8.h5', 'model2_9.h5', 'model2_10.h5', 'model2_11.h5',
                      'model2_12.h5', 'model2_13.h5', 'model2_14.h5', 'model2_15.h5', 'model2_Col.h5']
@@ -1578,7 +1599,7 @@ def bounded(s1='/content/drive/Shareddrives/red_gas_col/', s2='/content/drive/Sh
     Costos = pd.DataFrame()
     PjPi = pd.DataFrame()
     im = 8
-    path = s1 + filepath[im]
+    path = s1_path / filepath[im]
     Data_inf = pd.read_excel(path, sheet_name='node.info')
     Data_D = pd.read_excel(path, sheet_name='node.dem')
     Data_Dc = pd.read_excel(path, sheet_name='node.demcost')
@@ -1590,11 +1611,11 @@ def bounded(s1='/content/drive/Shareddrives/red_gas_col/', s2='/content/drive/Sh
                            Data_Dc['al_Ind'].values, Data_Dc['al_Com'].values, Data_Dc[
                                'al_NGV'].values, Data_Dc['al_Ref'].values, Data_Dc['al_Pet'].values,
                            Data_sto['C_S+'].values - Data_sto['C_V'].values, -1 * (Data_sto['C_S-'] - Data_sto['C_V']).values, Data_sto['C_V'].values)).reshape(-1, 1)
-    w = GenW(Data_inf, Data_W, Data_T, Data_C, Data_Dc, Data_sto)
+    w = gen_w(Data_inf, Data_W, Data_T, Data_C, Data_Dc, Data_sto)
     y = np.array(y_test[im])
     fd = np.array(X_test[im]).max(axis=0)
     model2 = flow_model(path, fd, seeds=1, s=s)
-    model2.load_weights(s2 + modelpath[im])
+    model2.load_weights(s2_path / modelpath[im])
     model_A = tf.keras.Model(inputs=model2.inputs,
                              outputs=model2.get_layer('F').output)
     model_B = tf.keras.Model(inputs=model2.inputs,
