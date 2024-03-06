@@ -11,6 +11,7 @@ Documentation Overview
    :name: mastertoc
 
    notebooks/01-examples_model_synthetic_data
+   notebooks/01_examples_model_synthetic_data
    notebooks/02-examples_model_real_data
 
 
