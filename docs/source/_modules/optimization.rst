@@ -14,4 +14,3 @@ Submodules
 
    optimization.model_real_data_
    optimization.model_synthetic_data_
-   optimization.modelos
