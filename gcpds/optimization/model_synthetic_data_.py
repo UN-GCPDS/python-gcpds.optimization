@@ -1,3 +1,29 @@
+"""
+========================================================
+Solver Applications in Optimization and Network Modeling
+========================================================
+
+
+The provided code constitutes a comprehensive framework for research and development in the fields of artificial intelligence and computational biology. Its architecture consists of specialized modules addressing key aspects of modeling, machine learning, and optimization, with an emphasis on code robustness and reusability.
+
+From a technical perspective, the code includes:
+
+Training Data Generation: Functionality for generating synthetic data and manipulating real datasets, with advanced options for controlled noise introduction and simulation of specific scenarios.
+
+Machine Learning Model Development: Tools for constructing and customizing machine learning models, including deep neural network architectures and supervised and unsupervised learning algorithms.
+
+Performance Evaluation: Capabilities for systematically evaluating model performance under various conditions, using statistical metrics and visualizations to analyze prediction quality and generalization ability.
+
+Optimization Solver Comparison: Functionality for comparing different optimization methods used in solving specific problems, with tools for measuring convergence, computational efficiency, and scalability.
+
+The underlying technical approach is based on the efficient implementation of algorithms and data structures, leveraging high-performance software libraries, and adopting software engineering practices such as modularity, encapsulation, and detailed documentation.
+
+
+
+
+"""
+
+
 import os
 import warnings
 from typing import Any, Callable, List, Tuple, Optional
@@ -40,14 +66,21 @@ def add_noise(data: np.ndarray, snr: float, mu: float = 0.0) -> np.ndarray:
     """
     Generate noise to be added to a signal with a specified signal-to-noise ratio (SNR).
 
-    Parameters:
-    - data (np.ndarray): The original signal data.
-    - snr (float): The desired signal-to-noise ratio in decibels.
-    - mu (float): The mean value for the noise generation, default is 0.0.
+    Parameters
+    ----------
+    data : np.ndarray
+        The original signal data.
+    snr : float
+        The desired signal-to-noise ratio in decibels.
+    mu : float, optional
+        The mean value for the noise generation, default is 0.0.
 
-    Returns:
-    - np.ndarray: The generated noise array with the same shape as the input data.
+    Returns
+    -------
+    np.ndarray
+        The generated noise array with the same shape as the input data.
     """
+
     mean_signal = abs(np.mean(data))
     signal_db = 10 * np.log10(mean_signal)
     noise_db = signal_db - snr
@@ -59,11 +92,18 @@ def probability_vector(num_elements: int = 5) -> np.ndarray:
     """
     Generate an array of size num_elements with elements rounded to two decimal places
     such that the sum is 1.0.
-    Parameters:
-    - num_elements (int): Number of elements in the generated array. Default is 5.
-    Returns:
-    - np.ndarray: A 1-D array of shape (num_elements, 1) with elements summing to 1.0.
+
+    Parameters
+    ----------
+    num_elements : int, optional
+        Number of elements in the generated array. Default is 5.
+
+    Returns
+    -------
+    np.ndarray
+        A 1-D array of shape (num_elements, 1) with elements summing to 1.0.
     """
+
     probabilities = np.empty(0)
 
     while probabilities.size != num_elements:
@@ -82,13 +122,19 @@ def random_matrix(num_ranges: int = 5, num_rows: int = 10) -> np.ndarray:
     Generate a matrix with uniformly distributed random values in the range [i-1, i],
     where i iterates from 1 to num_ranges, as columns, and num_rows rows.
 
-    Parameters:
-    - num_ranges (int): Number of different ranges to use for each column. Default is 5.
-    - num_rows (int): Number of rows in the generated matrix. Default is 10.
+    Parameters
+    ----------
+    num_ranges : int, optional
+        Number of different ranges to use for each column. Default is 5.
+    num_rows : int, optional
+        Number of rows in the generated matrix. Default is 10.
 
-    Returns:
-    - np.ndarray: A (num_rows, num_ranges) matrix of uniformly distributed random values.
+    Returns
+    -------
+    np.ndarray
+        A (num_rows, num_ranges) matrix of uniformly distributed random values.
     """
+
     matrix = np.zeros((num_rows, num_ranges))
     for i in range(1, num_ranges + 1):
         matrix[:, i - 1] = np.random.uniform(i - 1, i, num_rows)
@@ -102,28 +148,41 @@ class SoftmaxWeightConstraint(tf.keras.constraints.Constraint):
         """
         Initializes the constraint using a given softmax function.
 
-        Parameters:
-            softmax_function: The softmax function to be applied on the weights.
+        Parameters
+        ----------
+        softmax_function : Callable[[tf.Tensor, int], tf.Tensor]
+            The softmax function to be applied on the weights.
         """
+
         self.softmax_function = softmax_function
 
     def __call__(self, weights: tf.Tensor) -> tf.Tensor:
-        """Applies softmax on the weights along the specified axis.
+        """
+        Applies softmax on the weights along the specified axis.
 
-        Parameters:
-            weights: The tensor to which the softmax function will be applied.
+        Parameters
+        ----------
+        weights : tf.Tensor
+            The tensor to which the softmax function will be applied.
 
-        Returns:
+        Returns
+        -------
+        tf.Tensor
             The tensor with softmax applied.
         """
+
         return self.softmax_function(weights, axis=0)
 
     def get_config(self) -> dict:
-        """Gets the configuration of the constraint.
+        """
+        Gets the configuration of the constraint.
 
-        Returns:
+        Returns
+        -------
+        dict
             A dictionary containing the configuration of the constraint.
         """
+
         return {'softmax_function': self.softmax_function}
 
 
@@ -133,15 +192,23 @@ def minimize_l1_norm(y: np.ndarray, u: np.ndarray, s: int, solver: str = 'CPLEX'
     between y and the product of matrix u and vector z, with constraints that z
     sums to 1 and each entry in z is between 0 and 1 inclusive.
 
-    Parameters:
-    - y (np.ndarray): The observed data vector (n by 1).
-    - u (np.ndarray): The design matrix (n by s).
-    - s (int): The length of the solution vector z.
-    - solver (str): The solver used for the optimization problem, default is 'CPLEX'.
+    Parameters
+    ----------
+    y : np.ndarray
+        The observed data vector (n by 1).
+    u : np.ndarray
+        The design matrix (n by s).
+    s : int
+        The length of the solution vector z.
+    solver : str, optional
+        The solver used for the optimization problem, default is 'CPLEX'.
 
-    Returns:
-    - np.ndarray: The solution vector z with shape (s, 1).
+    Returns
+    -------
+    np.ndarray
+        The solution vector z with shape (s, 1).
     """
+
     z = cp.Variable((s, 1))
     objective = cp.Minimize(cp.norm(y - u @ z, p=1))
     constraints = [cp.sum(z) == 1, z >= 0, z <= 1]
@@ -156,20 +223,29 @@ class Evaluate:
     A class to handle the evaluation of models with respect to their Mean Absolute Percentage Error (MAPE) 
     metrics on various noise levels, using different solvers for optimization problems.
 
-    Attributes:
-    - result_path (str): The path where results should be saved.
-    - model_columns (List[str]): List of column names for the models.
-    - solvers (np.ndarray): An array of solver names.
-    - signal_to_noise_levels (List[Optional[int]]): List of signal-to-noise ratios to be evaluated, including `None` for the original signal.
+    Attributes
+    ----------
+    result_path : str
+        The path where results should be saved.
+    model_columns : List[str]
+        List of column names for the models.
+    solvers : np.ndarray
+        An array of solver names.
+    signal_to_noise_levels : List[Optional[int]]
+        List of signal-to-noise ratios to be evaluated, including `None` for the original signal.
     """
+
 
     def __init__(self, result_path: str = ''):
         """
         Initialize the Evaluate class with default parameters.
 
-        Parameters:
-        - result_path (str): The path where results should be saved. Defaults to an empty string.
+        Parameters
+        ----------
+        result_path : str, optional
+            The path where results should be saved. Defaults to an empty string.
         """
+
         self.model_columns: List[str] = [
             'NN(-1)', 'S(-1)', 'NN(1)', 'S(1)',
             'NN(3)', 'S(3)', 'NN(5)', 'S(5)', 'NN(N)', 'S(N)'
@@ -179,20 +255,32 @@ class Evaluate:
         self.signal_to_noise_levels: List[Optional[int]
             ] = [-1, 1, 3, 5, None]
 
-    def create_custom_model(self, input_size: int = 5, num_layers: int = 5, dropout_rate: float = 0.1, regularization_factor: float = 1e-4, learning_rate: float = 1e-3, loss: str ='huber') -> Model:
+    def create_custom_model(self, input_size: int = 5, num_layers: int = 5, dropout_rate: float = 0.1, regularization_factor: float = 1e-4, learning_rate: float = 1e-3, loss: str = 'huber') -> Model:
         """
         Create a custom Keras model with specified parameters and constraints.
 
-        Args:
-            input_size (int): The size of the input layer.
-            num_layers (int): The number of neurons in each dense layer.
-            dropout_rate (float): The dropout rate for regularization.
-            regularization_factor (float): The regularization factor for L1/L2 regularization.
-            learning_rate (float): The learning rate for the optimizer.
-            loss (str): The loss function selector.
-        Returns:
-            Model: A compiled Keras model.
+        Parameters
+        ----------
+        input_size : int, optional
+            The size of the input layer. Default is 5.
+        num_layers : int, optional
+            The number of neurons in each dense layer. Default is 5.
+        dropout_rate : float, optional
+            The dropout rate for regularization. Default is 0.1.
+        regularization_factor : float, optional
+            The regularization factor for L1/L2 regularization. Default is 1e-4.
+        learning_rate : float, optional
+            The learning rate for the optimizer. Default is 1e-3.
+        loss : str, optional
+            The loss function selector. Default is 'huber'.
+
+        Returns
+        -------
+        Model
+            A compiled Keras model.
         """
+
+
         input_tensor = Input(shape=(input_size,))
         loss = loss
         # Initialize the dense layer parameters
@@ -227,12 +315,18 @@ class Evaluate:
         Evaluate the model performance by measuring Mean Absolute Percentage Error (MAPE)
         on different levels of noise and save the results to Excel files.
 
-        Parameters:
-        - output_path (str): The directory path where Excel files will be saved. Defaults to an empty string.
+        Parameters
+        ----------
+        output_path : str, optional
+            The directory path where Excel files will be saved. Defaults to an empty string.
 
-        Returns:
-        - Tuple[pd.DataFrame, pd.DataFrame]: A tuple containing two pandas DataFrames of MAPE for y and pi respectively.
+        Returns
+        -------
+        Tuple[pd.DataFrame, pd.DataFrame]
+            A tuple containing two pandas DataFrames of MAPE for y and pi respectively.
         """
+
+
         MAPE_y = pd.DataFrame(columns=self.model_columns)
         MAPE_pi = pd.DataFrame(columns=self.model_columns)
 
@@ -274,9 +368,12 @@ class Evaluate:
         """
         Plot the training history for different loss functions.
 
-        Returns:
-            pd.DataFrame: A DataFrame containing the history of the model's loss and validation loss.
+        Returns
+        -------
+        pd.DataFrame
+            A DataFrame containing the history of the model's loss and validation loss.
         """
+
 
         # Obtener los datos de entrada y salida
         u = self.U[-1]
@@ -326,15 +423,23 @@ class Evaluate:
         """
         Evaluate the solver performance by comparing the predicted results against the true values
         and update the Mean Absolute Percentage Error (MAPE) dataframes for y and pi variables.
-    
-        Parameters:
-        - solver (str): The name of the solver used for the optimization problem.
-        - MAPE_y (pd.DataFrame): The DataFrame containing existing MAPE values for y.
-        - MAPE_pi (pd.DataFrame): The DataFrame containing existing MAPE values for pi.
-    
-        Returns:
-        - Tuple[pd.DataFrame, pd.DataFrame]: Updated MAPE dataframes for y and pi variables.
+
+        Parameters
+        ----------
+        solver : str
+            The name of the solver used for the optimization problem.
+        MAPE_y : pd.DataFrame
+            The DataFrame containing existing MAPE values for y.
+        MAPE_pi : pd.DataFrame
+            The DataFrame containing existing MAPE values for pi.
+
+        Returns
+        -------
+        Tuple[pd.DataFrame, pd.DataFrame]
+            Updated MAPE dataframes for y and pi variables.
         """
+
+
         for j, noise_level in enumerate(self.signal_to_noise_levels):
             MSE_s1: List[float] = []
             MSE_s2: List[float] = []
@@ -354,13 +459,19 @@ class Evaluate:
         """
         Plot the Mean Absolute Percentage Error (MAPE) for model predictions using a specified solver.
 
-        Args:
-            solver (str): The solver used for the optimization problem.
-            path (str): The directory path where the data files are located. Defaults to an empty string.
+        Parameters
+        ----------
+        solver : str
+            The solver used for the optimization problem.
+        path : str, optional
+            The directory path where the data files are located. Defaults to an empty string.
 
-        Raises:
-            FileNotFoundError: If the path does not contain the expected files.
+        Raises
+        ------
+        FileNotFoundError
+            If the path does not contain the expected files.
         """
+
         self.PIC = np.load(path + 'PIC.npy')
         self.U = np.load(path + 'U.npy')
         self.Y = np.load(path + 'Y.npy')
@@ -412,15 +523,21 @@ class Evaluate:
         """
         Generate data sets for the optimization problem with given parameters M, N, and s.
 
-        Parameters:
-        - M (int): Number of samples to generate. Default is 10.
-        - N (int): The number of observations for each sample. Default is 120.
-        - s (int): The number of elements in the PIC vector. Default is 5.
+        Parameters
+        ----------
+        M : int, optional
+            Number of samples to generate. Default is 10.
+        N : int, optional
+            The number of observations for each sample. Default is 120.
+        s : int, optional
+            The number of elements in the PIC vector. Default is 5.
 
-        Side effects:
-        - Saves arrays to disk (`PIC.npy`, `Z.npy`, `U.npy`, `Y.npy`).
-        - Prints the shapes of the generated arrays to the console.
+        Side effects
+        ------------
+        Saves arrays to disk (`PIC.npy`, `Z.npy`, `U.npy`, `Y.npy`).
+        Prints the shapes of the generated arrays to the console.
         """
+
         columns = ['CLARABEL', 'GUROBI', 'MOSEK', 'XPRESS', 'SCS']
         SNR = [-1, 1, 3, 5, None]
         PIC = np.zeros((M, s, 1))
@@ -457,11 +574,16 @@ class FlyEvaluate:
         """
         Initialize FlyEvaluate with default parameters.
 
-        Parameters:
-        - N (int): Number of simulation runs. Default is 100.
-        - C (int): Number of cycles in the simulation. Default is 500.
-        - t (int): Time lag in the model. Default is 1.
+        Parameters
+        ----------
+        N : int, optional
+            Number of simulation runs. Default is 100.
+        C : int, optional
+            Number of cycles in the simulation. Default is 500.
+        t : int, optional
+            Time lag in the model. Default is 1.
         """
+
         self.C = C
         self.N = N
         self.t = t
@@ -473,9 +595,12 @@ class FlyEvaluate:
         """
         Generate parameters for the growth model using random normal distributions.
 
-        Returns:
-        - A tuple of parameters (P, d, N0, od, op, e1, e2).
+        Returns
+        -------
+        Tuple[float, float, float, float, float, float, float]
+            A tuple of parameters (P, d, N0, od, op, e1, e2).
         """
+
         P = np.random.normal(2, 2**2)
         d = np.random.normal(-1.8, 0.4**2)
         N0 = np.random.normal(6, 0.5**2)
@@ -490,17 +615,27 @@ class FlyEvaluate:
         """
         Generate data for the fly population growth and corresponding weight matrices.
 
-        Parameters:
-        - P (float): Growth rate.
-        - N0 (float): Initial population.
-        - d (float): Death rate.
-        - e2 (float): Error term for the death rate.
-        - e1 (float): Error term for the growth rate.
-        - C (int): Number of cycles.
+        Parameters
+        ----------
+        P : float
+            Growth rate.
+        N0 : float
+            Initial population.
+        d : float
+            Death rate.
+        e2 : float
+            Error term for the death rate.
+        e1 : float
+            Error term for the growth rate.
+        C : int
+            Number of cycles.
 
-        Returns:
-        - Tuple of N (fly population) and W (weights) both as numpy arrays.
+        Returns
+        -------
+        Tuple[np.ndarray, np.ndarray]
+            Tuple of N (fly population) and W (weights) both as numpy arrays.
         """
+
         N: List[float] = [0] * self.t
         N.append(N0)
         W: List[List[float]] = []
@@ -575,9 +710,13 @@ class FlyEvaluate:
         """
         Create a Keras model with a set of dense layers and custom regularization.
 
+        Parameters:
+        - loss (str): The loss function selector. Defaults to 'huber'.
+
         Returns:
-            A Keras Model object.
+        - Model: A compiled Keras model.
         """
+
         input_tensor = Input(shape=(2,))
         regularization_strength = 1e-1
         learning_rate = 1e-3
@@ -614,11 +753,12 @@ class FlyEvaluate:
         Evaluate the model and compute Mean Absolute Percentage Error (MAPE) for predictions.
 
         Parameters:
-            path (str): The directory path to load and save data files. Defaults to an empty string.
+        - path (str): The directory path to load and save data files. Defaults to an empty string.
 
         Returns:
-            A tuple containing two DataFrames with MAPE for predictions and weights.
+        - Tuple[pd.DataFrame, pd.DataFrame]: A tuple containing two pandas DataFrames with MAPE for predictions and weights.
         """
+
         columns = ['Red', 'Solver']
         mape_y = pd.DataFrame(columns=columns)
         mape_w = pd.DataFrame(columns=columns)
@@ -649,18 +789,30 @@ class FlyEvaluate:
         mape_w.to_excel(path + 'Modelfly_w.xlsx', index=False)
         return mape_w, mape_y
 
-    def solver_eval(self, mape_w: pd.DataFrame, mape_y: pd.DataFrame, path: str = '') -> Tuple[pd.DataFrame, pd.DataFrame]:
+    def evaluate_solver(
+        self,
+        solver: str,
+        MAPE_y: pd.DataFrame,
+        MAPE_pi: pd.DataFrame
+    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """
-        Evaluate the solver performance and update the MAPE DataFrames.
+        Evaluate the solver performance and update the Mean Absolute Percentage Error (MAPE) dataframes.
 
-        Parameters:
-            mape_w (pd.DataFrame): DataFrame containing MAPE values for weights.
-            mape_y (pd.DataFrame): DataFrame containing MAPE values for predictions.
-            path (str): The directory path to load data files.
+        Parameters
+        ----------
+        solver : str
+            The name of the solver used for the optimization problem.
+        MAPE_y : pd.DataFrame
+            DataFrame containing MAPE values for y.
+        MAPE_pi : pd.DataFrame
+            DataFrame containing MAPE values for pi.
 
-        Returns:
-            Updated MAPE DataFrames for weights and predictions.
+        Returns
+        -------
+        Tuple[pd.DataFrame, pd.DataFrame]
+            Updated MAPE dataframes for y and pi variables.
         """
+
         columns = ['NN', 'Solver']
         fz = np.load(path + 'FZ.npy')
         fz = np.nan_to_num(fz, nan=1000)
@@ -690,11 +842,18 @@ class FlyEvaluate:
 
     def plot_results(self, path: str = '') -> None:
         """
-        Plot the MAPE results from the model and solver evaluations.
+        Plot the Mean Absolute Percentage Error (MAPE) results obtained from the evaluations of the model and solver.
 
-        Args:
-            path (str): The directory path where the data files are to be loaded from.
+        Parameters
+        ----------
+        path : str, optional
+            The directory path from which the data files are to be loaded. Default is an empty string.
+
+        Returns
+        -------
+        None
         """
+
         try:
             mape_y = pd.read_excel(path + 'Modelfly_y.xlsx')
             mape_w = pd.read_excel(path + 'Modelfly_w.xlsx')
@@ -724,13 +883,21 @@ class FlyEvaluate:
 
         plt.show()
 
-    def history_plot_loss(self, path= '') -> pd.DataFrame:
+    def history_plot_loss(self, path: str = '') -> pd.DataFrame:
         """
         Plot the history of loss and validation loss for different loss functions.
 
-        Returns:
-            A DataFrame with history of the model's loss and validation loss.
+        Parameters
+        ----------
+        path : str, optional
+            The directory path where the data files are to be loaded from. Defaults to an empty string.
+
+        Returns
+        -------
+        pd.DataFrame
+            A DataFrame with the history of the model's loss and validation loss.
         """
+
         fy = np.load(path + 'FY.npy', allow_pickle=True)
         fx = np.load(path + 'FX.npy', allow_pickle=True)
         history_loss = []

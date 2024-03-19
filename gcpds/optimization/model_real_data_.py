@@ -1,3 +1,31 @@
+"""
+========================================================
+Solver Applications in Optimization and Network Modeling
+========================================================
+
+
+The provided code constitutes a comprehensive framework for research and development in the fields of artificial intelligence and computational biology. Its architecture consists of specialized modules addressing key aspects of modeling, machine learning, and optimization, with an emphasis on code robustness and reusability.
+
+From a technical perspective, the code includes:
+
+Training Data Generation: Functionality for generating synthetic data and manipulating real datasets, with advanced options for controlled noise introduction and simulation of specific scenarios.
+
+Machine Learning Model Development: Tools for constructing and customizing machine learning models, including deep neural network architectures and supervised and unsupervised learning algorithms.
+
+Performance Evaluation: Capabilities for systematically evaluating model performance under various conditions, using statistical metrics and visualizations to analyze prediction quality and generalization ability.
+
+Optimization Solver Comparison: Functionality for comparing different optimization methods used in solving specific problems, with tools for measuring convergence, computational efficiency, and scalability.
+
+The underlying technical approach is based on the efficient implementation of algorithms and data structures, leveraging high-performance software libraries, and adopting software engineering practices such as modularity, encapsulation, and detailed documentation.
+
+
+
+
+"""
+
+
+
+
 from scipy.sparse import coo_matrix, eye, hstack
 from tensorflow.keras.callbacks import Callback
 from google.colab import drive
@@ -142,7 +170,7 @@ class CustomSigmoidActivation():
         Returns the configuration of the CustomSigmoidActivation function.
 
         Returns
-                -------
+        -------
         dict
             A dictionary containing the configuration: lower and upper bounds.
         """
@@ -509,6 +537,37 @@ class CustomLossFuntion(tf.keras.losses.Loss):
     """
 
     def __init__(self, Kt, i, j, Bc, ic, jc, find=6):
+
+        """
+        Initializes the object with given parameters.
+
+        Parameters
+        ----------
+        Kt : float
+            Constant value.
+        i : int
+            Integer value.
+        j : int
+            Integer value.
+        Bc : float
+            Boundary condition value.
+        ic : int
+            Integer value.
+        jc : int
+            Integer value.
+        find : int, optional
+            An integer defining something, by default 6.
+
+        Returns
+        -------
+        None
+
+        Notes
+        -----
+        This function initializes the object with the provided parameters and sets up
+        initial values for some internal variables such as bounds.
+
+        """
         super().__init__()
         self.Kt = Kt
         self.i = i
@@ -576,15 +635,31 @@ def flow_model(path, fd, seeds=1, s=1):
     """
     Builds and compiles a TensorFlow Keras model based on data from an Excel file and additional parameters.
 
-    Parameters:
-    - path (str): Path to the Excel file containing the model's data.
-    - fd (array-like): Additional flow data for the model.
-    - seeds (int): Seed for random number generation for reproducibility.
-    - s (int): Mode switch for the model configuration.
+    Parameters
+    ----------
+    path : str
+        Path to the Excel file containing the model's data.
+    fd : array-like
+        Additional flow data for the model.
+    seeds : int, optional
+        Seed for random number generation for reproducibility, by default 1.
+    s : int, optional
+        Mode switch for the model configuration, by default 1.
 
-    Returns:
-    - tensorflow.keras.Model: The compiled Keras model.
+    Returns
+    -------
+    tensorflow.keras.Model
+        The compiled Keras model.
+
+    Notes
+    -----
+    This function constructs and compiles a TensorFlow Keras model based on data extracted from an Excel file 
+    specified by `path`. Additionally, it accepts additional flow data (`fd`) to incorporate into the model.
+    The `seeds` parameter is used to set a seed for random number generation, ensuring reproducibility, 
+    while `s` allows for configuration of the model based on different modes.
+
     """
+
     seed = seeds
     np.random.seed(seed)
     tf.random.set_seed(seed)
@@ -686,17 +761,35 @@ def plots(Balance, Wey, re, Costos, s):
     """
     Creates a set of boxplot visualizations for various data frames.
 
-    Parameters:
-    - Balance (DataFrame): DataFrame containing balance data.
-    - Wey (DataFrame): DataFrame containing Weymouth data.
-    - re (DataFrame): DataFrame containing ratio data.
-    - Costos (DataFrame): DataFrame containing cost data.
-    - s (int): Mode switch for the plot titles.
-
     This function generates a 2x2 grid of boxplots, each representing data from
     one of the provided DataFrames. The boxplots for 'Balance' and 'Costos' are
     set to a logarithmic scale. The title of the plots changes based on the value of 's'.
+
+    Parameters
+    ----------
+    Balance : DataFrame
+        DataFrame containing balance data.
+    Wey : DataFrame
+        DataFrame containing Weymouth data.
+    re : DataFrame
+        DataFrame containing ratio data.
+    Costos : DataFrame
+        DataFrame containing cost data.
+    s : int
+        Mode switch for the plot titles.
+
+    Returns
+    -------
+    None
+
+    Notes
+    -----
+    This function generates visualizations for the provided DataFrames in a 2x2 grid of boxplots.
+    The titles of the plots change based on the value of 's'. 'Balance' and 'Costos' DataFrames
+    are displayed in a logarithmic scale.
+
     """
+
     # Create a 2x2 subplot grid
     fig, axs = plt.subplots(2, 2, figsize=(29, 20))
     fontsize = 20
@@ -756,12 +849,15 @@ def load_data(path, key):
     """
     Loads data from a MATLAB file specified by 'path' and extracts data based on 'key'.
 
-    Parameters:
-    - path (str): The path to the MATLAB file.
-    - key (str): The key corresponding to the data within the MATLAB file.
+    Parameters
+    ----------
 
-    Returns:
-    - list: A list containing the extracted data.
+     path (str): The path to the MATLAB file.
+     key (str): The key corresponding to the data within the MATLAB file.
+
+    Returns
+    -------
+    list: A list containing the extracted data.
 
     The function iterates through eight sets of data within the MATLAB file, extracting
     each set and appending it to a list. The extracted data is expected to be in a
@@ -782,17 +878,26 @@ def evaluate_balance(FT, W, X):
     """
     Evaluates the balance of predictions using Mean Absolute Percentage Error (MAPE).
 
-    Parameters:
-    - FT (list): A list containing two sets of forecasted data.
-    - W (array-like): Weight matrix used in the calculation.
-    - X (array-like): Actual data for comparison.
+    Parameters
+    ----------
+    FT : list
+        A list containing two sets of forecasted data.
+    W : array-like
+        Weight matrix used in the calculation.
+    X : array-like
+        Actual data for comparison.
 
-    Returns:
-    - list: A list containing two lists of MAPE values for each forecast set in FT.
+    Returns
+    -------
+    list
+        A list containing two lists of MAPE values for each forecast set in FT.
 
-    This function computes the MAPE between the actual data (X) and each set of
-    forecasted data in FT, using the provided weight matrix W.
+    Notes
+    -----
+    This function computes the Mean Absolute Percentage Error (MAPE) between the actual data (X)
+    and each set of forecasted data in FT, using the provided weight matrix W.
     """
+
     aux1 = [mape(X[i], FT[0][i] @ W.T) for i in range(len(FT[0]))]
     aux2 = [mape(X[i], FT[1][i] @ W.T) for i in range(len(FT[1]))]
 
@@ -804,15 +909,24 @@ def evaluate_weymouth(X, Y):
     Evaluates the Weymouth equation performance by calculating the MAPE (Mean Absolute Percentage Error)
     between actual values (X) and predicted values (Y).
 
-    Parameters:
-    - X (list of lists): Actual values for comparison.
-    - Y (list of lists): Predicted values to be compared against X.
+    Parameters
+    ----------
+    X : list of lists
+        Actual values for comparison.
+    Y : list of lists
+        Predicted values to be compared against X.
 
-    Returns:
-    - list of lists: Calculated MAPE values for each set of comparisons.
+    Returns
+    -------
+    list of lists
+        Calculated MAPE values for each set of comparisons.
 
-    The function calculates the MAPE for two sets of data (indicated by indices 0 and 1) in X and Y.
+    Notes
+    -----
+    This function calculates the Mean Absolute Percentage Error (MAPE) for two sets of data
+    (indicated by indices 0 and 1) in X and Y.
     """
+
     # Using list comprehensions for more concise code
     aux1 = [mape(X[0][i], Y[0][i]) for i in range(len(X[0]))]
     aux2 = [mape(X[1][i], Y[1][i]) for i in range(len(X[1]))]
@@ -824,18 +938,25 @@ def evaluate_cost(X, Y):
     """
     Calculates the difference between predicted costs and actual costs.
 
-    Parameters:
-    - X (list): A list of actual cost values.
-    - Y (list): A list of predicted cost values.
+    Parameters
+    ----------
+    X : list
+        A list of actual cost values.
+    Y : list
+        A list of predicted cost values.
 
-    Returns:
-    - list: A list of differences between predicted and actual costs.
+    Returns
+    -------
+    list
+        A list of differences between predicted and actual costs.
 
+    Notes
+    -----
     This function iterates over each element in X and Y, calculates the
     difference (Y[i] - X[i]) for each corresponding element, and returns
     these differences in a list.
     """
-    # Using list comprehension for concise calculation
+
     return [Y[i] - X[i] for i in range(len(X))]
 
 
@@ -843,39 +964,59 @@ class TimeHistoryTest(Callback):
     """
     A custom callback to track the time taken for predictions during model inference.
 
-    Attributes:
-    - prediction_times (list): A list to store the time taken for each prediction batch.
+    Attributes
+    ----------
+    prediction_times : list
+        A list to store the time taken for each prediction batch.
 
-    Methods:
-    - on_predict_begin: Called at the beginning of prediction.
-    - on_predict_batch_begin: Called at the beginning of a batch during prediction.
-    - on_predict_batch_end: Called at the end of a batch during prediction.
+    Methods
+    -------
+    on_predict_begin(self, logs=None):
+        Called at the beginning of prediction.
+    on_predict_batch_begin(self, batch, logs=None):
+        Called at the beginning of a batch during prediction.
+    on_predict_batch_end(self, batch, logs=None):
+        Called at the end of a batch during prediction.
     """
-
+    
     def on_predict_begin(self, logs=None):
         """
-        Initialize the prediction_times list at the beginning of prediction.
+        Initializes the prediction_times list at the beginning of prediction.
+
+        Parameters
+        ----------
+        logs : dict, optional
+            Dictionary containing the logs for the current prediction, by default None.
         """
+
         self.prediction_times = []
 
     def on_predict_batch_begin(self, batch, logs=None):
         """
-        Record the start time of a batch prediction.
+        Records the start time of a batch prediction.
 
-        Parameters:
-        - batch: Index of the batch.
-        - logs: Additional information about the batch.
+        Parameters
+        ----------
+        batch : int
+            Index of the batch.
+        logs : dict, optional
+            Additional information about the batch, by default None.
         """
+
         self.batch_time_start = time.time()
 
     def on_predict_batch_end(self, batch, logs=None):
         """
         Calculate and record the time taken for a batch prediction.
 
-        Parameters:
-        - batch: Index of the batch.
-        - logs: Additional information about the batch.
+        Parameters
+        ----------
+        batch : int
+            Index of the batch.
+        logs : dict, optional
+            Additional information about the batch, by default None.
         """
+
         batch_time_end = time.time() - self.batch_time_start
         self.prediction_times.append(batch_time_end)
 
@@ -884,17 +1025,24 @@ def extract_data(times, b):
     """
     Extracts a specific subset of data from a multi-dimensional array.
 
-    Parameters:
-    - times (multi-dimensional array): The source array from which data is extracted.
-    - b (int): The specific index in the first dimension to extract data from.
+    Parameters
+    ----------
+    times : multi-dimensional array
+        The source array from which data is extracted.
+    b : int
+        The specific index in the first dimension to extract data from.
 
-    Returns:
-    - list: A list containing the extracted data.
+    Returns
+    -------
+    list
+        A list containing the extracted data.
 
+    Notes
+    -----
     This function iterates over 320 elements in the specified sub-array of 'times',
     extracting a particular value from each element.
     """
-    # Using a list comprehension for concise extraction
+
     return [times[b, :][i][0][0] for i in range(320)]
 
 
@@ -902,12 +1050,23 @@ def plot_time(b='fit', s1='/content/drive/Shareddrives/red_gas_col/', s2='/conte
     """
     Generates and displays boxplot visualizations for time measurements of different network models.
 
-    Parameters:
-    - b (str): Indicates the type of operation to perform, 'fit' for fitting or 'predict' for prediction.
-    - s1 (str): Base path for the file location.
-    - s2 (str): Secondary path for data and model files.
-    - s (int): Mode indicator for selecting model paths.
+    Parameters
+    ----------
+    b : str, optional
+        Indicates the type of operation to perform, 'fit' for fitting or 'predict' for prediction, by default 'fit'.
+    s1 : str, optional
+        Base path for the file location, by default '/content/drive/Shareddrives/red_gas_col/'.
+    s2 : str, optional
+        Secondary path for data and model files, by default '/content/drive/Shareddrives/red_gas_col/Prueba/Data/'.
+    s : int, optional
+        Mode indicator for selecting model paths, by default 1.
 
+    Returns
+    -------
+    None
+
+    Notes
+    -----
     The function first determines the file paths for the Excel and model files based on the mode 's'.
     It then loads the test data and times data. If 'b' is 'predict', it iterates over models, performs
     predictions, measures the time taken for predictions, and stores these times in a DataFrame.
@@ -999,11 +1158,22 @@ def ng_case_evaluate(s1='/content/drive/Shareddrives/red_gas_col/', s2='/content
     """
     Evaluates multiple gas network cases using pre-trained models and generates evaluation metrics.
 
-    Parameters:
-    - s1 (str): Base directory path where the network case files are stored.
-    - s2 (str): Directory path where input and output data files, and model files are stored.
-    - s (int): Mode indicator (0 or 1) to choose between two sets of model paths.
+    Parameters
+    ----------
+    s1 : str, optional
+        Base directory path where the network case files are stored, by default '/content/drive/Shareddrives/red_gas_col/'.
+    s2 : str, optional
+        Directory path where input and output data files, and model files are stored, by default '/content/drive/Shareddrives/red_gas_col/Prueba/Data/'.
+    s : int, optional
+        Mode indicator (0 or 1) to choose between two sets of model paths, by default 1.
 
+    Returns
+    -------
+    tuple of DataFrames
+        A tuple of DataFrames containing evaluation metrics: (Balance, Weymouth, Pj/Pi, Cost).
+
+    Notes
+    -----
     This function performs the following steps:
     - Loads test input and output data.
     - Based on the mode 's', selects a set of model paths.
@@ -1012,9 +1182,8 @@ def ng_case_evaluate(s1='/content/drive/Shareddrives/red_gas_col/', s2='/content
     - Computes evaluation metrics such as Weymouth, Balance, Cost, and Pressure Ratios (Pj/Pi).
     - Aggregates the results into DataFrames for each metric.
     - Finally, calls the `plots` function to visualize the results.
-
-    Returns a tuple of DataFrames: (Balance, Weymouth, Pj/Pi, Cost)
     """
+
     s1_path = Path(s1)
     s2_path = Path(s2)
 
@@ -1122,24 +1291,31 @@ def ng_case_evaluate(s1='/content/drive/Shareddrives/red_gas_col/', s2='/content
     plots(Balance, Weymouth, PjPi, Costos, s=s)
     return(Balance, Weymouth, PjPi, Costos)
 
-
 def evaluate_balance_two(FT, W, X):
     """
     Evaluate the Mean Absolute Percentage Error (MAPE) between actual and predicted data.
 
-    Parameters:
-    - FT (list of numpy arrays): List of predicted flow data from models.
-    - W (numpy array): Weight matrix used for the calculation.
-    - X (list of numpy arrays): List of actual flow data for comparison.
+    Parameters
+    ----------
+    FT : list of numpy arrays
+        List of predicted flow data from models.
+    W : numpy array
+        Weight matrix used for the calculation.
+    X : list of numpy arrays
+        List of actual flow data for comparison.
 
-    Returns:
-    - list: A list containing MAPE values for each corresponding set of predicted and actual data.
+    Returns
+    -------
+    list
+        A list containing MAPE values for each corresponding set of predicted and actual data.
 
+    Notes
+    -----
     This function computes the MAPE for each set of predicted data in 'FT' against the actual data in 'X'.
     The computation involves a dot product of predicted data with the transpose of weight matrix 'W'.
     The function iterates over the elements of 'FT' and 'X' to compute MAPE for each set of data.
     """
-    # List comprehension for more concise and efficient calculation
+
     return [mape(X[i], FT[i] @ W.T) for i in range(len(FT))]
 
 
@@ -1147,17 +1323,24 @@ def evaluate_weymouth_two(X, Y):
     """
     Calculate the Mean Absolute Percentage Error (MAPE) between two sets of flow data.
 
-    Parameters:
-    - X (list of numpy arrays): The first set of flow data (usually the actual flow data).
-    - Y (list of numpy arrays): The second set of flow data (usually the predicted flow data).
+    Parameters
+    ----------
+    X : list of numpy arrays
+        The first set of flow data (usually the actual flow data).
+    Y : list of numpy arrays
+        The second set of flow data (usually the predicted flow data).
 
-    Returns:
-    - list: A list of MAPE values, each corresponding to the MAPE between the elements of X and Y.
+    Returns
+    -------
+    list
+        A list of MAPE values, each corresponding to the MAPE between the elements of X and Y.
 
-    The function iterates over the corresponding elements of X and Y, calculating the MAPE
+    Notes
+    -----
+    This function iterates over the corresponding elements of X and Y, calculating the MAPE
     for each pair of elements. The results are stored and returned in a list.
     """
-    # Using list comprehension for efficient computation
+
     return [mape(X[i], Y[i]) for i in range(len(X))]
 
 
@@ -1165,19 +1348,28 @@ def ng_evaluate_atip(s1='/content/drive/Shareddrives/red_gas_col/', s2='/content
     """
     Evaluate different neural network models on various gas network cases and plot their performance metrics.
 
-    Parameters:
-    - s1 (str): Base directory path for the model and Excel data files.
-    - s2 (str): Path for the input data files.
-    - s (int): Scenario indicator for choosing different sets of model paths.
+    Parameters
+    ----------
+    s1 : str, optional
+        Base directory path for the model and Excel data files, by default '/content/drive/Shareddrives/red_gas_col/'.
+    s2 : str, optional
+        Path for the input data files, by default '/content/drive/Shareddrives/red_gas_col/Prueba/Data/'.
+    s : int, optional
+        Scenario indicator for choosing different sets of model paths, by default 1.
 
-    The function processes multiple gas network cases in a loop. For each case, it loads necessary data,
+    Returns
+    -------
+    tuple
+        A tuple containing lists of evaluation metrics (Balance, Weymouth, PjPi, Costos) for each network case.
+
+    Notes
+    -----
+    This function processes multiple gas network cases in a loop. For each case, it loads necessary data,
     constructs and loads a neural network model, and predicts outputs. It then evaluates these predictions
     using custom functions for different metrics such as Weymouth formula, balance, cost, and pressure ratios.
     The function visualizes these metrics using boxplot graphs.
-
-    Returns:
-    - tuple: A tuple containing lists of evaluation metrics (Balance, Weymouth, PjPi, Costos) for each network case.
     """
+
     s1_path = Path(s1)
     s2_path = Path(s2)
 
@@ -1313,16 +1505,26 @@ def visualize_atipic(dataframe, columns):
     """
     Identifies and visualizes the percentage of outlier values in specified columns of a DataFrame.
 
-    Parameters:
-    - dataframe (DataFrame): The DataFrame in which to identify outliers.
-    - columns (list): List of column names in the DataFrame to analyze.
+    Parameters
+    ----------
+    dataframe : DataFrame
+        The DataFrame in which to identify outliers.
+    columns : list
+        List of column names in the DataFrame to analyze.
 
+    Returns
+    -------
+    None
+
+    Notes
+    -----
     This function utilizes the Interquartile Range (IQR) method to identify outliers.
     A value is considered an outlier if it is below Q1 - 1.5 * IQR or above Q3 + 1.5 * IQR,
     where Q1 and Q3 are the first and third quartiles, respectively.
 
     The function generates a bar plot displaying the percentage of outliers in each column.
     """
+
     outlier_percentages = []
     colors = []  # List to store colors for each column
 
@@ -1346,18 +1548,27 @@ def visualize_atipic(dataframe, columns):
     plt.yticks(fontsize=20)
     plt.show()
 
-
 def visualize_non_convergence(data_path='/content/drive/Shareddrives/red_gas_col/Prueba/Data/inputs_None_', network_range=(8, 17)):
     """
     Visualizes the percentage of non-convergence cases for different network dimensions.
 
-    Parameters:
-    - data_path (str): Path to the directory containing input data files.
-    - network_range (tuple): Range of network files to analyze (inclusive).
+    Parameters
+    ----------
+    data_path : str, optional
+        Path to the directory containing input data files, by default '/content/drive/Shareddrives/red_gas_col/Prueba/Data/inputs_None_'.
+    network_range : tuple, optional
+        Range of network files to analyze (inclusive), by default (8, 17).
 
-    The function loads data from specified files and calculates the percentage of
+    Returns
+    -------
+    None
+
+    Notes
+    -----
+    This function loads data from specified files and calculates the percentage of
     non-convergence cases. It then generates a bar plot to visually represent this data.
     """
+
 
     data_path = Path(data_path)
     percentages = []
@@ -1385,12 +1596,21 @@ def identify_atypical_values(files):
     """
     Identify and visualize the percentage of atypical values in a list of arrays.
 
-    Parameters:
-    - files: List of arrays. Each array represents a different data set.
+    Parameters
+    ----------
+    files : list of arrays
+        List of arrays. Each array represents a different data set.
 
-    The function calculates the percentage of values in each array that are greater than 1,
+    Returns
+    -------
+    None
+
+    Notes
+    -----
+    This function calculates the percentage of values in each array that are greater than 1,
     indicating atypical values. It then visualizes these percentages using a bar plot.
     """
+
     percentages = []
     labels = []
 
@@ -1417,9 +1637,22 @@ def dynamic_val(s1='/content/drive/Shareddrives/red_gas_col/', s2='/content/driv
     """
     Generates sinusoidal behavior and adjusts random data accordingly.
 
-    Returns:
-    - X_test: Randomly generated data.
+    Parameters
+    ----------
+    s1 : str, optional
+        Path for the first directory, by default '/content/drive/Shareddrives/red_gas_col/'.
+    s2 : str, optional
+        Path for the second directory, by default '/content/drive/Shareddrives/red_gas_col/Prueba/Data/'.
+
+    Returns
+    -------
+    X_test : Randomly generated data.
+
+    Notes
+    -----
+    This function generates sinusoidal behavior and adjusts random data accordingly.
     """
+
     # Step 1: Generate desired sinusoidal behavior
     x = np.linspace(0, 2 * np.pi, 1000)  # Generates x values from 0 to 2*pi
     amplitude = 150                         # Sine wave amplitude
@@ -1500,14 +1733,17 @@ def loss_val():
     """
     Visualizes and compares differences in performance metrics of various models using box plots.
 
+    Notes
+    -----
     This function loads performance data from different models from the files Weymouth.xlsx, Balance.xlsx, and Costos.xlsx.
     Then, box plots are generated for each of these metrics, showing how the performance values are distributed among the different models.
 
     The plots display the Mean Absolute Percentage Error (MAPE) and costs, facilitating visual comparison between the models.
     A logarithmic scale is used to ease the visualization of data that may have a wide range of values.
 
-    The function has no input parameters and does not return any value. The results are directly displayed as plots.
+    This function has no input parameters and does not return any value. The results are directly displayed as plots.
     """
+
 
     W = pd.read_csv(
         '/content/drive/Shareddrives/red_gas_col/Prueba/Data/Weymouth.xlsx')
